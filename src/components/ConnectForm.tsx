@@ -1,11 +1,14 @@
 import React, { useState } from "react";
-import { setConstantValue } from "typescript";
+import { connect } from '../ClientSocket'
+
 
 interface FormProps {
-  handleConnect: (name: string) => void;
+  setConnected: React.Dispatch<React.SetStateAction<boolean>>
+  setGlobalName: React.Dispatch<React.SetStateAction<string>>
+  handleNewMessage: (name: string, message: string) => void
 }
 
-const ConnectForm: React.FC<FormProps> = ({ handleConnect }) => {
+const ConnectForm: React.FC<FormProps> = ({ setConnected, handleNewMessage, setGlobalName }) => {
   const [name, setName] = useState<string>("");
 
   // Preprocess before making connection request
@@ -15,7 +18,9 @@ const ConnectForm: React.FC<FormProps> = ({ handleConnect }) => {
       alert("Please enter your name")
       return
     }
-    handleConnect(name)
+    connect(handleNewMessage);
+    setConnected(true);
+    setGlobalName(name);
   }
 
   return (

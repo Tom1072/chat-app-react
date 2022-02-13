@@ -1,9 +1,10 @@
-import { Client, IMessage, Message, messageCallbackType,  } from '@stomp/stompjs'
+import { Client, IMessage } from '@stomp/stompjs'
 import SockJS from 'sockjs-client';
+import { Message } from './components/Messages'
 
 let client: Client;
 
-const connect = (name: string): void => {
+export function connect(handleNewMessage: (name: string, message: string) => void): void {
     console.log("Connect")
 
     client = new Client({
@@ -14,25 +15,14 @@ const connect = (name: string): void => {
     });
 
     client.onConnect = (frame) => {
-        client.subscribe('/topic/greetings', (message: IMessage) => {
-            console.log("greetings subscribed")
-            console.log(JSON.parse(message.body));
+        client.subscribe('/response/message', (message: IMessage) => {
+            let body: Message = JSON.parse(message.body);
+            console.log(body);
+            handleNewMessage(body.name, body.message);
         })
-        sendMessage(name);
     }
-    // stompClient.connect({}, function (frame) {
-    //     setConnected(true);
-    //     console.log('Connected: ' + frame);
-    //     stompClient.subscribe('/topic/greetings', function (greeting) {
-    //         showGreeting(JSON.parse(greeting.body).content);
-    //     });
-    // });
 
     client.onStompError = function (frame) {
-        // Will be invoked in case of error encountered at Broker
-        // Bad login/passcode typically will cause an error
-        // Complaint brokers will set `message` header with a brief message. Body may contain details.
-        // Compliant brokers will terminate the connection after any error
         console.log('Broker reported error: ' + frame.headers['message']);
         console.log('Additional details: ' + frame.body);
     };
@@ -40,19 +30,17 @@ const connect = (name: string): void => {
     client.activate();
 }
 
-const sendMessage = (message: string): void => {
+export function sendMessage(name: string, message: string): void {
     client.publish({
-        destination: "/app/hello",
+        destination: "/request/message",
         body: JSON.stringify({
-            name: message
+            name: name,
+            message: message
         })
     })
 }
 
 
-const disconnect = (): void => {
+export function disconnect(): void {
     console.log("Disconnect")
 }
-
-
-export default connect;

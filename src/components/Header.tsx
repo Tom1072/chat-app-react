@@ -11,7 +11,7 @@ const Header: React.FC<HeaderProps> = ( {title} ) => {
 }
 
 Header.defaultProps = {
-  title: 'Header'
+  title: 'Chat Application'
 };
 
 
